@@ -1,29 +1,43 @@
-function sendMessage() {
+import { HfInference } from "@huggingface/inference";
+
+const client = new HfInference("hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
+async function sendMessage() {
   const userInput = document.getElementById("user-input");
   const chatWindow = document.getElementById("chat-window");
 
-  // Create user message element
+  // Display user message in chat
   const userMessage = document.createElement("div");
   userMessage.classList.add("message", "user-message");
   userMessage.textContent = userInput.value;
-
-  // Add user message to chat window
   chatWindow.appendChild(userMessage);
 
-  // Clear input
+  // Prepare request with Hugging Face model
+  let out = "";
+  const stream = client.chatCompletionStream({
+    model: "meta-llama/Llama-3.2-3B-Instruct",
+    messages: [
+      { role: "user", content: userInput.value }
+    ],
+    max_tokens: 500
+  });
+
+  // Clear input field
   userInput.value = "";
 
-  // Scroll chat window to the bottom
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-
-  // Create bot response (simple static response for now)
-  const botMessage = document.createElement("div");
-  botMessage.classList.add("message", "bot-message");
-  botMessage.textContent = "I'm here to help! (Bot response)";
-
-  // Add bot message to chat window with a short delay
-  setTimeout(() => {
-    chatWindow.appendChild(botMessage);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  }, 500);
+  // Show bot's response
+  for await (const chunk of stream) {
+    if (chunk.choices && chunk.choices.length > 0) {
+      const newContent = chunk.choices[0].delta.content;
+      out += newContent;
+      
+      // Update the bot's message dynamically as response comes in
+      const botMessage = document.createElement("div");
+      botMessage.classList.add("message", "bot-message");
+      botMessage.textContent = newContent;
+      chatWindow.appendChild(botMessage);
+      
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+  }
 }
