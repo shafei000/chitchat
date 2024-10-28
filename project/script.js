@@ -1,6 +1,6 @@
 import { HfInference } from "@huggingface/inference";
 
-const client = new HfInference("hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+const client = new HfInference("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");
 
 async function sendMessage() {
   const userInput = document.getElementById("user-input");
