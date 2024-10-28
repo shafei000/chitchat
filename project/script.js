@@ -49,3 +49,4 @@ async function sendMessage() {
   userInput.value = "";
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
+window.sendMessage = sendMessage;
